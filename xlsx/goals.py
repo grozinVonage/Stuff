@@ -59,9 +59,6 @@ class Employee:
 
     # =========================================================
     def my_employees_sum(self):
-        self.my_employees_total = self.total
-        self.my_employees_done = self.num_done
-        self.my_employees_not_done = self.num_not_done
 
         for key, value in self.my_employees.items():
             if value.is_manager:
@@ -70,6 +67,12 @@ class Employee:
                     self.my_employees_done = self.my_employees_done + value.num_done
                 else:
                     self.my_employees_not_done = self.my_employees_not_done + value.num_not_done
+        
+        # At least one of the employee is also a manager
+        if self.my_employees_total != 0:
+            self.my_employees_total = self.my_employees_total + self.total
+            self.my_employees_done = self.my_employees_done + self.num_done
+            self.my_employees_not_done = self.my_employees_not_done + self.num_not_done
 
     # =========================================================
     def __repr__(self):
@@ -172,44 +175,6 @@ def read(f_name: object, my_dict: object) -> object:
             my_dict[employee_name].goals = sheet1.cell(row=row_index, column=17).value
 
 
-
-# =========================================================
-def the_recursive(sheet, curr_employee, col_index, alignment, mng_root_name):
-
-    global g_row_index
-    for e_name, employee in curr_employee.items():
-
-        if employee.is_manager:
-
-            g_row_index = g_row_index + 1
-
-            sheet.cell(row=g_row_index, column=col_index + 1).value = employee.name
-
-            if employee.report_to == mng_root_name and int(employee.my_employees_total):
-                sheet.cell(row=g_row_index, column=col_index + 2 + alignment).value = employee.my_employees_total
-
-                sheet.cell(row=g_row_index, column=col_index + 3 + alignment).value = employee.my_employees_done
-
-                sheet.cell(row=g_row_index, column=col_index + 4 + alignment).value = employee.my_employees_not_done
-
-                sheet.cell(row=g_row_index, column=col_index + 5 + alignment).value = round((int(
-                    employee.my_employees_done) / int(employee.my_employees_total)) * 100)
-
-                g_row_index = g_row_index + 1
-
-            sheet.cell(row=g_row_index, column=col_index + 2 + alignment).value = employee.total
-
-            sheet.cell(row=g_row_index, column=col_index + 3 + alignment).value = employee.num_done
-
-            sheet.cell(row=g_row_index, column=col_index + 4 + alignment).value = employee.num_not_done
-
-            sheet.cell(row=g_row_index, column=col_index + 5 + alignment).value = round((int(employee.num_done) / int(employee.total)) * 100)
-
-            g_row_index = g_row_index + 1
-
-            the_recursive(sheet, employee.my_employees, col_index+1, alignment-1, mng_root_name)
-
-
 # =========================================================
 def write_to_file(f_name, a_dict, r_name):
     wb = openpyxl.load_workbook(f_name)
@@ -220,7 +185,6 @@ def write_to_file(f_name, a_dict, r_name):
 
     root = a_dict[r_name]
     if root:
-        # the_recursive(sheet, root.my_employees, 0, 3, root_name)
         root.save_to_file(sheet, 0, 3)
     wb.save(f_name)
 
