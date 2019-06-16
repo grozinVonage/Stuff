@@ -2,11 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Raz is the King</title>
 </head>
 <body>
-    <h2>The Button Element</h2>
-    <button type="button" onclick="alert('Hello world!')">Click Me!</button>
+
+    <form action = "http://localhost:5000/run" method = "POST">
+         <p>Disconnect every (sec): <input type = "text" name = "disconnect" /></p>
+         <p>Stay disconnect(sec): <input type = "text" name = "stay_disconnect" /></p>
+         <p><input type = "submit" value = "submit" /></p>
+    </form>
 
 </body>
 </html>
