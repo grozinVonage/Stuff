@@ -15,56 +15,29 @@ import threading
 
 class MyThread(threading.Thread):
 
-    def __init__(self):
+    def __init__(self, event):
         threading.Thread.__init__(self)
-        # self.daemon = True  # Allow main to exit even if still running.
-        self.paused = True  # Start out paused.
-        self.state = threading.Condition()
-        # self.stopped = event
+        self.stop_event = event
         self.disconnect_interval = 0
         self.offline_time = 0
-        self.initialized = False
-
-    # =========================================================
 
     def set(self, _disconnect_interval, _offline_time ):
         self.disconnect_interval = int(_disconnect_interval)
         self.offline_time = int(_offline_time)
 
-    # =========================================================
+    def stop(self):
+        self.stopped = True
 
-    def start_once(self):
-        if self.initialized is False:
-            self.initialized = True
-            self.start()
-
-    # =========================================================
     def run(self):
-        #while not self.stopped.wait(self.disconnect_interval):
-        self.resume()
-        while True:
-            with self.state:
-                if self.paused:
-                    self.state.wait()  # Block execution until notified.
-                # Do stuff.
-                print("my thread")
-                self.do_disconnect()
-                time.sleep(self.offline_time)
-                self.do_connect()
-                time.sleep(self.disconnect_interval)
+        while not self.stop_event.wait(self.disconnect_interval):
+            print("my thread")
+            self.do_disconnect()
+            time.sleep(self.offline_time)
+            self.do_connect()
 
     # =========================================================
-    def resume(self):
-        with self.state:
-            self.paused = False
-            self.state.notify()  # Unblock self if waiting.
-    # =========================================================
 
-    def pause(self):
-        with self.state:
-            self.paused = True  # Block self.
 
-    # =========================================================
     def do_connect(self):
         os.system("networksetup -setairportpower airport on")
         print("Connected : %s" % time.ctime())
@@ -80,8 +53,8 @@ class MyThread(threading.Thread):
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-# stopFlag = threading.Event()
-myThread = MyThread()
+stopFlag = None
+myThread = None
 
 
 # =========================================================
@@ -116,10 +89,12 @@ def metrics(file_name = 'index.html' ):  # pragma: no cover
 
 @app.route('/stop',methods = ['POST', 'GET'])
 def stop():
-
+    global stopFlag
     if request.method == 'POST':
-        myThread.pause()
+        stopFlag.set()
+        myThread.stopped = True
         myThread.do_connect()
+
 
         return metrics('index.html')
 
@@ -129,12 +104,16 @@ def stop():
 @app.route('/run',methods = ['POST', 'GET'])
 def run():
     global myThread
+    global stopFlag
     if request.method == 'POST':
+        stopFlag = threading.Event()
+        myThread = MyThread(stopFlag)
+
         result = request.form
         disconnect_interval = result["disconnect"]
         offline_time = result["offline"]
         myThread.set(disconnect_interval,offline_time)
-        myThread.start_once()
+        myThread.start()
 
         return metrics('run.html')
 # =========================================================
