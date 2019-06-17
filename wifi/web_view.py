@@ -20,11 +20,22 @@ class MyThread(threading.Thread):
         self.stopped = event
         self.disconnect_interval = 0
         self.offline_time = 0
+        self.initialized = False
 
-    def set(self, _disconnect_interval , _offline_time ):
-        self.disconnect_interval = int(_disconnect_interval) * 1000
-        self.offline_time = int(_offline_time) * 1000
+    # =========================================================
 
+    def set(self, _disconnect_interval, _offline_time ):
+        self.disconnect_interval = int(_disconnect_interval)
+        self.offline_time = int(_offline_time)
+
+    # =========================================================
+
+    def start_once(self):
+        if self.initialized is False:
+            self.initialized = True
+            self.start()
+
+    # =========================================================
     def run(self):
         while not self.stopped.wait(self.disconnect_interval):
             print("my thread")
@@ -89,6 +100,8 @@ def stop():
     global stopFlag
     if request.method == 'POST':
         stopFlag.set()
+        myThread.do_connect()
+
         return metrics('index.html')
 
 # =========================================================
@@ -102,7 +115,8 @@ def run():
         disconnect_interval = result["disconnect"]
         offline_time = result["offline"]
         myThread.set(disconnect_interval,offline_time)
-        myThread.start()
+        myThread.start_once()
+
         return metrics('run.html')
 # =========================================================
 
