@@ -15,9 +15,12 @@ import threading
 
 class MyThread(threading.Thread):
 
-    def __init__(self, event):
+    def __init__(self):
         threading.Thread.__init__(self)
-        self.stopped = event
+        # self.daemon = True  # Allow main to exit even if still running.
+        self.paused = True  # Start out paused.
+        self.state = threading.Condition()
+        # self.stopped = event
         self.disconnect_interval = 0
         self.offline_time = 0
         self.initialized = False
@@ -37,15 +40,31 @@ class MyThread(threading.Thread):
 
     # =========================================================
     def run(self):
-        while not self.stopped.wait(self.disconnect_interval):
-            print("my thread")
-            self.do_disconnect()
-            time.sleep(self.offline_time)
-            self.do_connect()
+        #while not self.stopped.wait(self.disconnect_interval):
+        self.resume()
+        while True:
+            with self.state:
+                if self.paused:
+                    self.state.wait()  # Block execution until notified.
+                # Do stuff.
+                print("my thread")
+                self.do_disconnect()
+                time.sleep(self.offline_time)
+                self.do_connect()
+                time.sleep(self.disconnect_interval)
 
     # =========================================================
+    def resume(self):
+        with self.state:
+            self.paused = False
+            self.state.notify()  # Unblock self if waiting.
+    # =========================================================
 
+    def pause(self):
+        with self.state:
+            self.paused = True  # Block self.
 
+    # =========================================================
     def do_connect(self):
         os.system("networksetup -setairportpower airport on")
         print("Connected : %s" % time.ctime())
@@ -61,8 +80,8 @@ class MyThread(threading.Thread):
 
 app = Flask(__name__)
 app.config.from_object(__name__)
-stopFlag = threading.Event()
-myThread = MyThread(stopFlag)
+# stopFlag = threading.Event()
+myThread = MyThread()
 
 
 # =========================================================
@@ -97,9 +116,9 @@ def metrics(file_name = 'index.html' ):  # pragma: no cover
 
 @app.route('/stop',methods = ['POST', 'GET'])
 def stop():
-    global stopFlag
+
     if request.method == 'POST':
-        stopFlag.set()
+        myThread.pause()
         myThread.do_connect()
 
         return metrics('index.html')
