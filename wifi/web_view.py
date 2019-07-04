@@ -4,7 +4,7 @@ import os.path
 import threading
 
 
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request , jsonify
 
 import webview
 import sys
@@ -58,13 +58,17 @@ def run():
         offline_time = result["offline"]
         myThread.set(disconnect_interval,offline_time)
         myThread.start()
-        return render_template('index.html')
+        # return render_template('index.html')
+        # params = {'offline_time': offline_time}
+        # return jsonify(params)
         #return metrics('run.html')
+        return 'OK', 200
 # =========================================================
 
 
 def start_server():
    app.run(host='0.0.0.0', port=5000)
+
 
 # =========================================================
 if __name__ == '__main__':
