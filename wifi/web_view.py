@@ -6,6 +6,7 @@ import threading
 
 from flask import Flask, render_template, Response, request , jsonify
 
+from flask_cors import CORS
 import webview
 import sys
 import mythread
@@ -14,6 +15,7 @@ import mythread
 # =========================================================
 
 app = Flask(__name__)
+CORS(app)
 #app._static_folder = os.path.abspath("templates/static/")
 # app.config.from_object(__name__)
 
@@ -49,20 +51,19 @@ def stop():
 def run():
     global myThread
     global stopFlag
-    if request.method == 'POST':
-        stopFlag = threading.Event()
-        myThread = mythread.MyThread(stopFlag)
+    #if request.method == 'POST':
+    stopFlag = threading.Event()
+    myThread = mythread.MyThread(stopFlag)
 
-        result = request.form
-        disconnect_interval = result["disconnect"]
-        offline_time = result["offline"]
-        myThread.set(disconnect_interval,offline_time)
-        myThread.start()
-        # return render_template('index.html')
-        # params = {'offline_time': offline_time}
-        # return jsonify(params)
-        #return metrics('run.html')
-        return 'OK', 200
+    disconnect_interval = int(request.args.get('disconnect', 0))
+    offline_time = int(request.args.get('offline', 0))
+
+    myThread.set(disconnect_interval,offline_time)
+    myThread.start()
+    return jsonify({
+        "disconnect": disconnect_interval,
+        "offline": offline_time,
+    })
 # =========================================================
 
 
