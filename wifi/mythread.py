@@ -10,10 +10,12 @@ class MyThread(threading.Thread):
 
     def __init__(self, event):
         threading.Thread.__init__(self)
+
         self.stop_event = event
         self.disconnect_interval = 0
         self.offline_time = 0
         self.stopped = False
+        self.daemon = True
 
     # =========================================================
     def set(self, _disconnect_interval, _offline_time ):
@@ -23,6 +25,7 @@ class MyThread(threading.Thread):
     # =========================================================
     def stop(self):
         self.stopped = True
+        self._stop()
 
     # =========================================================
     def run(self):
