@@ -14,7 +14,6 @@ class MyThread(threading.Thread):
         self.stop_event = event
         self.disconnect_interval = 0
         self.offline_time = 0
-        self.stopped = False
         self.daemon = True
 
     # =========================================================
@@ -23,14 +22,10 @@ class MyThread(threading.Thread):
         self.offline_time = int(_offline_time)
 
     # =========================================================
-    def stop(self):
-        self.stopped = True
-        self._stop()
 
-    # =========================================================
     def run(self):
+        print("Stared : %s" % time.ctime())
         while not self.stop_event.wait(self.disconnect_interval):
-            print("my thread")
             self.do_disconnect()
             time.sleep(self.offline_time)
             self.do_connect()
