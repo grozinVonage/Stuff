@@ -24,8 +24,10 @@ class OnlineThread(threading.Thread):
         print("Stared : %s" % time.ctime())
         self.online_interval = int(_online_interval)
         self.do_connect()
+        self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
         time.sleep(self.online_interval)
-        self.update_ui()
+        self.update_ui(vns.eventDispatcher.MyEvent.DONE_CONNECTED)
+
 
     # =========================================================
     def do_connect(self):
@@ -33,6 +35,6 @@ class OnlineThread(threading.Thread):
         print("Connected : %s" % time.ctime())
 
     # =========================================================
-    def update_ui(self):
+    def update_ui(self,event):
         self.event_dispatcher.dispatch_event(
-            vns.eventDispatcher.MyEvent(vns.eventDispatcher.MyEvent.CONNECTED, self))
+            vns.eventDispatcher.MyEvent(event, self))

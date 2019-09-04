@@ -23,8 +23,10 @@ class OfflineThread(threading.Thread):
         print("Stared : %s" % time.ctime())
         self.offline_interval = int(_offline_interval)
         self.do_disconnect()
+
+        self.update_ui(vns.eventDispatcher.MyEvent.DISCONNECTED)
         time.sleep(self.offline_interval)
-        self.update_ui()
+        self.update_ui(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED)
 
 
     # =========================================================
@@ -34,7 +36,7 @@ class OfflineThread(threading.Thread):
 
     # =========================================================
 
-    def update_ui(self):
+    def update_ui(self, event):
         self.event_dispatcher.dispatch_event(
-            vns.eventDispatcher.MyEvent(vns.eventDispatcher.MyEvent.DISCONNECTED, self))
+            vns.eventDispatcher.MyEvent(event, self))
 

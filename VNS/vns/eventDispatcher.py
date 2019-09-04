@@ -108,4 +108,6 @@ class MyEvent(Event):
 
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
+    DONE_CONNECTED = "done_connected"
+    DONE_DISCONNECTED = "done_disconnected"
 
