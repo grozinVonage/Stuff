@@ -2,9 +2,10 @@
 from tkinter import *
 import threading
 
-import vns.onlinetTread
+import vns.onlineThread
 import vns.offlineThread
 import vns.eventDispatcher
+import vns.networkHandler
 
 # =========================================================
 
@@ -47,18 +48,18 @@ class MyGUI():
         self.event_dispatcher = vns.eventDispatcher.EventDispatcher()
 
         # Listen for CONNECT & DISCONNECT event type
-        self.event_dispatcher.add_event_listener(vns.MyEvent.CONNECTED, self.update)
-        self.event_dispatcher.add_event_listener(vns.MyEvent.DISCONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.CONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DISCONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DONE_CONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED, self.update)
 
-        self.stopFlag = None
-
-        self.onlineTherad = None
-        self.offlineTherad = None
+        self.networkHandler = vns.networkHandler.NetworkHandler("NetworkHandlerThread",self.event_dispatcher)
         self.stoped = True
 
     # =========================================================
     def run(self):
-
+        self.networkHandler.start()
+        # self.networkHandler.join(1)
         self.window.mainloop()
 
     # =========================================================
@@ -71,33 +72,29 @@ class MyGUI():
     # =========================================================
 
     def stop(self):
-        if self.myThread is None:
-            return
-        self.stopFlag.set()
-        self.myThread.do_connect()
-        self.myThread = None
-        self.stopFlag = None
         self.stoped = True
+        #self.stopEvent.set()
+        self.networkHandler.pause()
 
     # =========================================================
 
     def start(self):
+
         self.stoped = False
         online_interval = int(self.online.get())
         offline_interval = int(self.offline.get())
+        #self.stopEvent = threading.Event()
+        self.networkHandler.setIntervals(online_interval, offline_interval)
+        #self.networkHandler.setStopEvent(self.stopEvent)
 
-        self.onlineTherad = vns.onlineThread.OnlineThread()
-        self.offlineTherad = vns.offlineThread.OfflineThread()
-
-        self.stopFlag = threading.Event()
-
-        self.onlineTherad.run(online_interval)
-
-
-
+        #self.onlineTherad.run(online_interval)
+        self.networkHandler.resume()
+        #threading.thread.start_new_thread( self.networkHandler.do_connect(online_interval,))
 
     # =========================================================
+
     def clicked(self):
+
         if self.stoped:
             self.start()
             self.btn["text"] = "Stop"
@@ -107,13 +104,16 @@ class MyGUI():
 
     # =========================================================
     def update(self,event):
-        online_interval = int(self.online.get())
-        offline_interval = int(self.offline.get())
-        if event.data == vns.MyEvent.CONNECTED:
 
-        if event.data == vns.MyEvent.DONE_CONNECTED:
-            self.onlineTherad.stop()
-            self.offlineTherad.run(offline_interval)
-        if event.data == vns.MyEvent.DONE_DISCONNECTED:
-            self.offlineTherad.stop()
-            self.onlineTherad.start(online_interval)
+        if event.type == vns.eventDispatcher.MyEvent.CONNECTED:
+            self.lbl_status = "Connected"
+
+        if event.type == vns.eventDispatcher.MyEvent.DISCONNECTED:
+            self.lbl_status = "Disconnected"
+
+        #if event.type == vns.eventDispatcher.MyEvent.DONE_CONNECTED:
+        #    threading.thread.start_new_thread(self.networkHandler.do_disconnect(offline_interval, ))
+
+        #if event.type == vns.eventDispatcher.MyEvent.DONE_DISCONNECTED:
+        #    threading.thread.start_new_thread(self.networkHandler.do_connect(online_interval, ))
+    # =========================================================

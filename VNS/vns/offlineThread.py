@@ -9,17 +9,18 @@ import vns.eventDispatcher
 
 class OfflineThread(threading.Thread):
 
-    def __init__(self, ui = None):
+    def __init__(self, event_dispatcher):
         threading.Thread.__init__(self)
 
         self.offline_interval = 0
         self.daemon = False
-        self.ui = ui
-
+        # Save a reference to the event dispatch
+        self.event_dispatcher = event_dispatcher
 
     # =========================================================
 
     def run(self, _offline_interval):
+        
         print("Stared : %s" % time.ctime())
         self.offline_interval = int(_offline_interval)
         self.do_disconnect()
@@ -28,9 +29,10 @@ class OfflineThread(threading.Thread):
         time.sleep(self.offline_interval)
         self.update_ui(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED)
 
-
     # =========================================================
+    
     def do_disconnect(self):
+        
         os.system("networksetup -setairportpower airport off")
         print("Disconnected : %s" % time.ctime())
 

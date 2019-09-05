@@ -4,7 +4,6 @@ import threading
 import time
 import vns.eventDispatcher
 
-
 # =========================================================
 
 
@@ -24,13 +23,16 @@ class OnlineThread(threading.Thread):
         print("Stared : %s" % time.ctime())
         self.online_interval = int(_online_interval)
         self.do_connect()
+
         self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
         time.sleep(self.online_interval)
         self.update_ui(vns.eventDispatcher.MyEvent.DONE_CONNECTED)
 
 
     # =========================================================
+
     def do_connect(self):
+
         os.system("networksetup -setairportpower airport on")
         print("Connected : %s" % time.ctime())
 
