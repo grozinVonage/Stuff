@@ -65,7 +65,8 @@ class MyGUI():
     # =========================================================
 
     def close_window(self):
-        self.stop()
+        #self.stop()
+        self.networkHandler.stop()
         # self.window.winfo_exists()
         self.window.destroy()
 
@@ -84,7 +85,7 @@ class MyGUI():
         online_interval = int(self.online.get())
         offline_interval = int(self.offline.get())
         #self.stopEvent = threading.Event()
-        self.networkHandler.setIntervals(online_interval, offline_interval)
+        self.networkHandler.set_intervals(online_interval, offline_interval)
         #self.networkHandler.setStopEvent(self.stopEvent)
 
         #self.onlineTherad.run(online_interval)

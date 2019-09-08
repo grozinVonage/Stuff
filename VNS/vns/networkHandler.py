@@ -5,6 +5,8 @@ import threading
 import vns.eventDispatcher
 
 global exitFlag
+
+
 # =========================================================
 
 
@@ -20,7 +22,7 @@ class NetworkHandler(threading.Thread):
         self.disconnect_interval = 0
         self.state = threading.Condition()
         self.paused = True  # Start out paused.
-
+        self.stop_thread = False
 
     # =========================================================
 
@@ -35,53 +37,59 @@ class NetworkHandler(threading.Thread):
             self.paused = True  # Block self.
 
     # =========================================================
-    #def setStopEvent(self, stopEvent):
-    #    self.stopEvent = stopEvent
+    def stop(self):
+        with self.state:
+            self.stop_thread = True
+            self.state.notify()  # Unblock self if waiting.
+
 
     # =========================================================
-
-    def setIntervals(self, online_interval, offline_interval):
+    def set_intervals(self, online_interval, offline_interval):
         self.connect_interval = online_interval
-        self.disconnect_interval= offline_interval
+        self.disconnect_interval = offline_interval
 
     # =========================================================
     def run(self):
-        # self.resume()
-        #while not self.stopEvent.isSet():
         while True:
             with self.state:
                 if self.paused:
-                    self.do_connect(self.connect_interval)
+                    self.connect()
                     self.state.wait()  # Block execution until notified.
+                if self.stop_thread:
+                    self.connect()
+                    exit(0)
             self.do_connect(self.connect_interval)
             self.do_disconnect(self.disconnect_interval)
 
-
     # =========================================================
-
-    def do_connect(self, online_interval):
-
+    def connect(self):
         print("Connect stared : %s" % time.ctime())
         os.system("networksetup -setairportpower airport on")
         print("Connected : %s" % time.ctime())
 
+    # =========================================================
+    def disconnect(self):
+        print("disconnect Stared : %s" % time.ctime())
+        os.system("networksetup -setairportpower airport off")
+        print("Disconnected : %s" % time.ctime())
+    # =========================================================
+
+    def do_connect(self, online_interval):
+        self.connect()
         self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
         time.sleep(self.connect_interval)
         self.update_ui(vns.eventDispatcher.MyEvent.DONE_CONNECTED)
 
     # =========================================================
 
-    def do_disconnect(self,offline_interval):
-        print("disconnect Stared : %s" % time.ctime())
-        os.system("networksetup -setairportpower airport off")
-        print("Disconnected : %s" % time.ctime())
-
+    def do_disconnect(self, offline_interval):
+        self.disconnect()
         self.update_ui(vns.eventDispatcher.MyEvent.DISCONNECTED)
         time.sleep(self.disconnect_interval)
         self.update_ui(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED)
 
     # =========================================================
-    def update_ui(self,event):
+    def update_ui(self, event):
         self.event_dispatcher.dispatch_event(
             vns.eventDispatcher.MyEvent(event, self))
 
