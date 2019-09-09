@@ -43,9 +43,9 @@ class MyGUI():
         self.btn.grid(column=1, row=2)
 
         current_path = os.getcwd()
-        self.on_file_name = current_path + "/vns/wifi.gif"
+        self.on_file_name = current_path + "/vns/wifi" #gif file
         self.wifi_on = tk.PhotoImage(file=self.on_file_name)
-        self.off_file_name = current_path + "/vns/wifi_off.gif"
+        self.off_file_name = current_path + "/vns/wifi_off" # gif file
         self.wifi_off = tk.PhotoImage(file=self.off_file_name)
         self.wifi_lable = Label(self.window, compound=tk.LEFT, text="", image=self.wifi_on)
         self.wifi_lable.grid(column=1, row=3)
