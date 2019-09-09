@@ -54,6 +54,7 @@ class NetworkHandler(threading.Thread):
             with self.state:
                 if self.paused:
                     self.connect()
+                    self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
                     self.state.wait()  # Block execution until notified.
                 if self.stop_thread:
                     self.connect()

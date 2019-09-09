@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from tkinter import *
-import threading
+import tkinter as tk
+import os
 
 import vns.onlineThread
 import vns.offlineThread
@@ -16,7 +17,7 @@ class MyGUI():
 
         self.window = Tk()
         self.window.title("Vonage QA - Raz is the king")
-        self.window.geometry('350x200')
+        self.window.geometry('400x300')
         self.window.protocol("WM_DELETE_WINDOW", self.close_window)
 
         self.lbl_disconnect = Label(self.window, text="Stay online for")
@@ -37,11 +38,18 @@ class MyGUI():
         self.lbl_sec_offline = Label(self.window, text="sec")
         self.lbl_sec_offline.grid(column=2, row=1)
 
-        self.lbl_status = Label(self.window, text="Connected")
-        self.lbl_status.grid(column=1, row=2)
 
         self.btn = Button(self.window, text="Lets Go", command=self.clicked)
-        self.btn.grid(column=2, row=3)
+        self.btn.grid(column=1, row=2)
+
+        current_path = os.getcwd()
+        self.on_file_name = current_path + "/vns/wifi.gif"
+        self.wifi_on = tk.PhotoImage(file=self.on_file_name)
+        self.off_file_name = current_path + "/vns/wifi_off.gif"
+        self.wifi_off = tk.PhotoImage(file=self.off_file_name)
+        self.wifi_lable = Label(self.window, compound=tk.LEFT, text="", image=self.wifi_on)
+        self.wifi_lable.grid(column=1, row=3)
+
 
         # Create and instance of event dispatcher
         # Save event dispatcher reference
@@ -59,7 +67,6 @@ class MyGUI():
     # =========================================================
     def run(self):
         self.networkHandler.start()
-        # self.networkHandler.join(1)
         self.window.mainloop()
 
     # =========================================================
@@ -74,7 +81,6 @@ class MyGUI():
 
     def stop(self):
         self.stoped = True
-        #self.stopEvent.set()
         self.networkHandler.pause()
 
     # =========================================================
@@ -84,13 +90,8 @@ class MyGUI():
         self.stoped = False
         online_interval = int(self.online.get())
         offline_interval = int(self.offline.get())
-        #self.stopEvent = threading.Event()
         self.networkHandler.set_intervals(online_interval, offline_interval)
-        #self.networkHandler.setStopEvent(self.stopEvent)
-
-        #self.onlineTherad.run(online_interval)
         self.networkHandler.resume()
-        #threading.thread.start_new_thread( self.networkHandler.do_connect(online_interval,))
 
     # =========================================================
 
@@ -107,14 +108,11 @@ class MyGUI():
     def update(self,event):
 
         if event.type == vns.eventDispatcher.MyEvent.CONNECTED:
-            self.lbl_status = "Connected"
+            self.wifi_lable.configure(image=self.wifi_on)
+            self.wifi_lable.image = self.wifi_on
 
         if event.type == vns.eventDispatcher.MyEvent.DISCONNECTED:
-            self.lbl_status = "Disconnected"
+            self.wifi_lable.configure(image=self.wifi_off)
+            self.wifi_lable.image = self.wifi_off
 
-        #if event.type == vns.eventDispatcher.MyEvent.DONE_CONNECTED:
-        #    threading.thread.start_new_thread(self.networkHandler.do_disconnect(offline_interval, ))
-
-        #if event.type == vns.eventDispatcher.MyEvent.DONE_DISCONNECTED:
-        #    threading.thread.start_new_thread(self.networkHandler.do_connect(online_interval, ))
     # =========================================================
