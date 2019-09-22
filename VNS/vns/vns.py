@@ -2,15 +2,17 @@
 
 import sys
 
-import vns.myGUI
+import myGUI
 
 # =========================================================
 
 def main():
 
-    network_controler = vns.myGUI.MyGUI()
+    network_controler = myGUI.MyGUI()
     network_controler.run()
 
     sys.exit()
 
 # ===========================================================
+if __name__ == '__main__':
+    main()

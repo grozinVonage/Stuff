@@ -3,10 +3,8 @@ from tkinter import *
 import tkinter as tk
 import os
 
-import vns.onlineThread
-import vns.offlineThread
-import vns.eventDispatcher
-import vns.networkHandler
+import eventDispatcher
+import networkHandler
 
 # =========================================================
 
@@ -43,9 +41,9 @@ class MyGUI():
         self.btn.grid(column=1, row=2)
 
         current_path = os.getcwd()
-        self.on_file_name = current_path + "/vns/wifi" #gif file
+        self.on_file_name = current_path + "/wifi" #gif file
         self.wifi_on = tk.PhotoImage(file=self.on_file_name)
-        self.off_file_name = current_path + "/vns/wifi_off" # gif file
+        self.off_file_name = current_path + "/wifi_off" # gif file
         self.wifi_off = tk.PhotoImage(file=self.off_file_name)
         self.wifi_lable = Label(self.window, compound=tk.LEFT, text="", image=self.wifi_on)
         self.wifi_lable.grid(column=1, row=3)
@@ -53,15 +51,15 @@ class MyGUI():
 
         # Create and instance of event dispatcher
         # Save event dispatcher reference
-        self.event_dispatcher = vns.eventDispatcher.EventDispatcher()
+        self.event_dispatcher = eventDispatcher.EventDispatcher()
 
         # Listen for CONNECT & DISCONNECT event type
-        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.CONNECTED, self.update)
-        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DISCONNECTED, self.update)
-        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DONE_CONNECTED, self.update)
-        self.event_dispatcher.add_event_listener(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(eventDispatcher.MyEvent.CONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(eventDispatcher.MyEvent.DISCONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(eventDispatcher.MyEvent.DONE_CONNECTED, self.update)
+        self.event_dispatcher.add_event_listener(eventDispatcher.MyEvent.DONE_DISCONNECTED, self.update)
 
-        self.networkHandler = vns.networkHandler.NetworkHandler("NetworkHandlerThread",self.event_dispatcher)
+        self.networkHandler = networkHandler.NetworkHandler("NetworkHandlerThread",self.event_dispatcher)
         self.stoped = True
 
     # =========================================================
@@ -107,11 +105,11 @@ class MyGUI():
     # =========================================================
     def update(self,event):
 
-        if event.type == vns.eventDispatcher.MyEvent.CONNECTED:
+        if event.type == eventDispatcher.MyEvent.CONNECTED:
             self.wifi_lable.configure(image=self.wifi_on)
             self.wifi_lable.image = self.wifi_on
 
-        if event.type == vns.eventDispatcher.MyEvent.DISCONNECTED:
+        if event.type == eventDispatcher.MyEvent.DISCONNECTED:
             self.wifi_lable.configure(image=self.wifi_off)
             self.wifi_lable.image = self.wifi_off
 

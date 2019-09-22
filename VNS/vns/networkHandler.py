@@ -2,7 +2,7 @@
 import os
 import time
 import threading
-import vns.eventDispatcher
+import eventDispatcher
 
 global exitFlag
 
@@ -17,7 +17,6 @@ class NetworkHandler(threading.Thread):
         self.name = threadName
         # Save a reference to the event dispatch
         self.event_dispatcher = event_dispatcher
-        # self.stopEvent = 0
         self.connect_interval = 0
         self.disconnect_interval = 0
         self.state = threading.Condition()
@@ -54,7 +53,7 @@ class NetworkHandler(threading.Thread):
             with self.state:
                 if self.paused:
                     self.connect()
-                    self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
+                    self.update_ui(eventDispatcher.MyEvent.CONNECTED)
                     self.state.wait()  # Block execution until notified.
                 if self.stop_thread:
                     self.connect()
@@ -77,21 +76,21 @@ class NetworkHandler(threading.Thread):
 
     def do_connect(self, online_interval):
         self.connect()
-        self.update_ui(vns.eventDispatcher.MyEvent.CONNECTED)
+        self.update_ui(eventDispatcher.MyEvent.CONNECTED)
         time.sleep(self.connect_interval)
-        self.update_ui(vns.eventDispatcher.MyEvent.DONE_CONNECTED)
+        self.update_ui(eventDispatcher.MyEvent.DONE_CONNECTED)
 
     # =========================================================
 
     def do_disconnect(self, offline_interval):
         self.disconnect()
-        self.update_ui(vns.eventDispatcher.MyEvent.DISCONNECTED)
+        self.update_ui(eventDispatcher.MyEvent.DISCONNECTED)
         time.sleep(self.disconnect_interval)
-        self.update_ui(vns.eventDispatcher.MyEvent.DONE_DISCONNECTED)
+        self.update_ui(eventDispatcher.MyEvent.DONE_DISCONNECTED)
 
     # =========================================================
     def update_ui(self, event):
         self.event_dispatcher.dispatch_event(
-            vns.eventDispatcher.MyEvent(event, self))
+            eventDispatcher.MyEvent(event, self))
 
     # =========================================================
