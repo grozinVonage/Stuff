@@ -17,15 +17,13 @@ public class RestCall {
     public static String WAV_ENCODE = "Hi Alon";
 
     public interface VMos {
-        @GET("/bins/1w1ac") // specify the sub url for the base url
-        void getData(Callback<JSONObject> callback); // will give you the json data
+
         @PUT("/{bucket_key}/{file_name}")
         void updateVMOSResult(@Path("bucket_key") String bucketKey,
                               @Path("file_name") String fileName,
                               @Body String encoded_string,
                               Callback<JSONObject> callback);
-        @GET("/")
-        void getTest(Callback<JSONObject> callback);
+
         @PUT("/{file_name}")
         void updateTest( @Path("file_name") String filename,
                          @Body String encoded_string,
