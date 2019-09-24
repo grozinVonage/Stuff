@@ -14,6 +14,9 @@ the path can be omitted.
 import base64
 import os
 import json
+
+from requests import Response
+
 try:
     import http.server as server
 except ImportError:
@@ -32,8 +35,16 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
         if os.path.exists(filename):
             self.send_response(409, 'Conflict')
             self.end_headers()
-            reply_body = '"%s" already exists\n' % filename
-            self.wfile.write(reply_body.encode('utf-8'))
+            #reply_body = '"%s" already exists\n' % filename
+            #self.wfile.write(reply_body.encode('utf-8'))
+            ret_json = {}
+            ret_json['file'] = filename
+            ret_json['Conflict'] = "already exists"
+            json_data = json.dumps(ret_json)
+            resp = Response(json_data, status=409, mimetype='application/json')
+
+            self.send_response(resp)
+            self.end_headers()
             return
 
         file_length = int(self.headers['Content-Length'])
@@ -43,18 +54,20 @@ class HTTPRequestHandler(server.SimpleHTTPRequestHandler):
             #print(s)
             # data = base64.b64decode(s)
             output_file.write(self.rfile.read(file_length))
-        self.send_response(201, 'Created')
-        self.end_headers()
-        #reply_body = 'Saved "%s"\n' % filename
-        #self.wfile.write(reply_body.encode('utf-8'))
-
 
         ret_json = {}
         ret_json['file'] = filename
         json_data = json.dumps(ret_json)
+        resp = Response(json_data, status=200, mimetype='application/json')
+
         # st = json.loads(self.json_data)
-        byt = json_data.encode()
-        self.wfile.write(byt)
+        #byt = json_data.encode()
+        #self.wfile.write(ret_json)
+        #reply_body = 'Saved "%s"\n' % filename
+        #self.wfile.write(reply_body.encode('utf-8'))
+        #self.send_response(201, 'Created')
+        self.send_response(resp)
+        self.end_headers()
 
     def do_GET(self):
         self.send_response(200)

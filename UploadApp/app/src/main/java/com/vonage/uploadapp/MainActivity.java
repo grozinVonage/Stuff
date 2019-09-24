@@ -19,10 +19,13 @@ import com.squareup.okhttp.OkHttpClient;
 
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -105,23 +108,21 @@ public class MainActivity extends AppCompatActivity {
     private void uploadFile(){
 
 
-        String encodedFile = "";
+        String encodedString = "";
         try {
 
             String baseDir = Environment.getExternalStorageDirectory().getAbsolutePath();
             String fileName = "/MyTest.wav";
             String fullPath = baseDir + RECORDED_DEVICE_DIR + fileName;
-            // Not sure if the / is on the path or not
             File f = new File(fullPath);
-            //FileInputStream fiStream = new FileInputStream(f);
+            InputStream ff = new FileInputStream(f);
+            BufferedInputStream in = new BufferedInputStream(ff);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] fileAudioByte = out.toByteArray();
+            in.read(fileAudioByte);
+            encodedString = Base64.encodeToString(fileAudioByte, Base64.DEFAULT);
 
-            //byte[] bytes = null;
-
-            // You might not get the whole file, lookup File I/O examples for Java
-            //fiStream.read(bytes);
-            //fiStream.close();
-            encodedFile = encodeFileToBase64Binary(f);
-            //encodedFile = Base64.encodeToString(source.getBytes("utf-8"), Base64.DEFAULT);
+            //encodedString = encodeFileToBase64Binary(f);
 
         }
         catch (IOException ioException) {
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         RestCall.VMos client = adapter.create(RestCall.VMos.class);
 
         //Defining the method
-        client.updateTest("wav_test",encodedFile,new Callback<JSONObject>() {
+        client.updateTest("wav_test",encodedString,new Callback<JSONObject>() {
             @Override
             public void success(JSONObject json_response, Response response) {
                 if (json_response != null) {

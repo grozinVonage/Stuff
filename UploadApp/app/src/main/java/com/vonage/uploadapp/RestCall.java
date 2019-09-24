@@ -11,7 +11,8 @@ import retrofit.http.Path;
 
 public class RestCall {
 
-    public static String BASEURL = "http://192.168.1.104:8000";
+      public static String BASEURL = "http://192.168.1.104:8000";
+    // public static String BASEURL = "http://10.138.99.105:8000";
     // public static String BASEURL="https://tbaxwkhma4.execute-api.us-east-1.amazonaws.com/beta";
 
     public static String WAV_ENCODE = "Hi Alon";
